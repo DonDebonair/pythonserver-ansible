@@ -1,49 +1,54 @@
 ---
 
 - hosts: pythonbox
-  sudo: True
 
   vars:
-    app_name: my_app
+    app_name: myapp
     repo_url: https://github.com/someuser/myapp
     repo_remote: origin
-    repo_version: master
     webapps_dir: /srv/webapps
     wsgi_file: app.py
     wsgi_callable: app
     app_database:
-      name: my_app_db
-      user: my_app_db_user
-      password: my_app_db_password
+      name: myapp
+      user: myapp
+      password: myapp
 
   tasks:
+    - name: ensure webapps directory
+      file: dest={{ webapps_dir }} owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }} state=directory
+      sudo: True
+
     - name: ensure log directory
       file: dest={{ webapps_dir }}/{{ app_name }}/log state=directory
 
     - name: deploy code from repository
-      git: repo=$repo_url dest={{ webapps_dir }}/{{ app_name }} remote= {{ repo_remote }} version={{ repo_version }}
-
+      shell: git clone -b master {{ repo_url }} {{ webapps_dir }}/{{ app_name }}/src
 
     - name: install dependencies into virtualenv
-      pip: requirements={{ webapps_dir }}/{{ app_name }}/requirements.txt virtualenv={{ webapps_dir }}/{{ app_name }}/venv state=present
+      pip: requirements={{ webapps_dir }}/{{ app_name }}/src/requirements.txt virtualenv={{ webapps_dir }}/{{ app_name }}/venv state=present
 
     - name: create supervisor program config
       template: src=templates/supervisor_app.conf dest=/etc/supervisor/conf.d/{{ app_name }}.conf
       notify:
         - restart app
+      sudo: True
 
     - name: create nginx site config
       template: src=templates/nginx_site.conf dest=/etc/nginx/sites-available/{{ app_name }}.conf
       notify:
         - restart nginx
+      sudo: True
 
     - name: link nginx config
       file: src=/etc/nginx/sites-available/{{ app_name }}.conf dest=/etc/nginx/sites-enabled/{{ app_name }}.conf state=link
       notify:
         - restart nginx
+      sudo: True
 
     - name: start app
       supervisorctl: name={{ app_name }} state=started
+      sudo: True
 
     - name: setup database for app
       sudo_user: postgres
@@ -54,6 +59,7 @@
         lc_ctype: 'en_US.UTF-8'
         template: 'template0'
         state: present
+      sudo: True
 
     - name: grant access for app database to app user
       sudo_user: postgres
@@ -61,13 +67,16 @@
         db: "{{ app_database.name }}"
         user: "{{ app_database.user }}"
         password: "{{ app_database.password }}"
-        priv: 'ALL'
+        priv: ALL
         state: present
+      sudo: True
 
   handlers:
     - name: restart app
       supervisorctl: name={{ app_name }} state=restarted
+      sudo: True
 
     - name: restart nginx
       service: name=nginx state=restarted
+      sudo: True
 

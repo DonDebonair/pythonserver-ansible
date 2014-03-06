@@ -12,7 +12,7 @@
     state: directory
 
 - name: Copy supervisor global configuration
-  copy: src=supervisord.conf dest=/etc/supervisor/supervisord.conf
+  copy: src=supervisord.conf dest=/etc/supervisord.conf
 
 - name: Install as service with automatic start on redhat/centos
   copy: src=supervisor dest=/etc/init.d/supervisord mode=0755 group=root owner=root
