@@ -9,3 +9,12 @@
 
 - name: install postgresql python bindings
   pip: name=psycopg2
+
+- name: grant access for sentry database to graphite user
+  sudo_user: postgres
+  postgresql_user:
+    user: "{{ postgres.superuser }}"
+    password: "{{ postgres.superuser_password }}"
+    role_attr_flags: "CREATEDB,SUPERUSER"
+    state: present
+  when: postgres.superuser is defined

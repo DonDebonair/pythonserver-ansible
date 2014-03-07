@@ -1,6 +1,11 @@
 - hosts: all
   sudo: True
 
+  vars:
+    postgres:
+      superuser: diamond
+      superuser_password: rBJAyLpHx8R4qZgPJE
+
   roles:
     - common
     - python
