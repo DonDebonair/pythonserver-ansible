@@ -4,7 +4,6 @@
     - python
     - python-dev
     - python-setuptools
-  when: ansible_os_family == "Debian"
 
 - name: install pip
   easy_install: name=pip
