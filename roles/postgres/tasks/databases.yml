@@ -1,0 +1,32 @@
+---
+
+- name: Enable postgres access
+  command: psql -c "alter user postgres password '{{ postgres_pwd }}'"
+  with_items: databases
+
+- name: Create databases
+  postgresql_db:
+    name={{ item }}
+    encoding=UTF-8
+    login_password={{ postgres_pwd }}
+  with_items: databases
+
+- name: Create database users
+  postgresql_user:
+    db={{ item }}
+    name={{ item }}
+    password={{ lookup('password', pwd_root + item + ' length=80') }}
+    role_attr_flags=NOCREATEDB,NOCREATEROLE,NOCREATEUSER
+    login_password={{ postgres_pwd }}
+  with_items: databases
+
+- name: Allow access for database users
+  lineinfile:
+    dest=/etc/postgresql/9.1/main/pg_hba.conf
+    line="host{{ '\t' }}{{ item[0] }}{{ '\t' }}{{ item[0] }}{{ '\t' }}{{ item[1] }}{{ '\t' }}md5"
+  with_nested:
+    - databases
+    - trusted_networks
+  notify:
+    - reload postgresql
+

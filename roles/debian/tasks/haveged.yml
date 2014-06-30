@@ -1,0 +1,4 @@
+---
+
+- name: "Install haveged for extra entropy"
+  apt: name=haveged state=present

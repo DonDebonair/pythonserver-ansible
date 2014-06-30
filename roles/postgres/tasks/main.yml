@@ -1,20 +1,8 @@
-- name: install postgresql packages debian/ubuntu
-  apt: pkg={{ item }} state=latest
-  with_items:
-    - postgresql
-    - postgresql-contrib
-    - postgresql-client
-    - libpq-dev
-  when: ansible_os_family == "Debian"
+---
 
-- name: install postgresql python bindings
-  pip: name=psycopg2
+- include: install.yml
+  sudo: yes
 
-- name: grant access for sentry database to graphite user
+- include: databases.yml
+  sudo: yes
   sudo_user: postgres
-  postgresql_user:
-    user: "{{ postgres.superuser }}"
-    password: "{{ postgres.superuser_password }}"
-    role_attr_flags: "CREATEDB,SUPERUSER"
-    state: present
-  when: postgres.superuser is defined

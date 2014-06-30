@@ -1,0 +1,19 @@
+---
+- include: apt.yml
+  sudo: yes
+  tags: apt
+
+- include: unattended-upgrades.yml
+  sudo: yes
+  tags: unattended
+
+- include: kernel-check.yml
+  tags: kernel_check
+
+- include: sudo.yml
+  sudo: yes
+  tags: sudo
+
+- include: haveged.yml
+  sudo: yes
+  tags: haveged

@@ -1,0 +1,8 @@
+---
+
+- name: Reload sudo
+  service:
+    name=sudo
+    state=reloaded
+  sudo: yes
+

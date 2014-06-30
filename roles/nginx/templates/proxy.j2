@@ -7,8 +7,18 @@ server {
     access_log /var/log/nginx/{{ item.server }}-access.log combined;
     error_log  /var/log/nginx/{{ item.server }}-error.log;
 
+    {% if item.secure|default(false) %}
+	ssl on;
+	ssl_certificate {{ nginx_cert_dir }}/{{ item.server }}.crt;
+	ssl_certificate_key {{ nginx_cert_dir }}/{{ item.server }}.key;
+    {% endif %}
+
     location / {
-	    root /var/www/{{ item.server }};
+        proxy_pass {{ item.proxy }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Base-Uri "${scheme}://$host/";
     }
 
 	{% if item.status|default(true) %}
@@ -21,4 +31,5 @@ server {
 		deny all;
 	}
     {% endif %}
+
 }

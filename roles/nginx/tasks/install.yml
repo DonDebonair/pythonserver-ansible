@@ -1,0 +1,19 @@
+---
+- name: Install nginx
+  apt:
+    name=nginx
+    state=present
+
+# Fixes a problem with nginx on small droplets
+- name: Fix hash_buckets
+  lineinfile:
+    dest=/etc/nginx/nginx.conf
+    regexp="server_names_hash_bucket_size"
+    line="server_names_hash_bucket_size 64;"
+  notify:
+    - reload nginx
+
+- name: Start nginx
+  service:
+    name=nginx
+    state=started

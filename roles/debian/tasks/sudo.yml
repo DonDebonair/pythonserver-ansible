@@ -1,0 +1,9 @@
+---
+
+- name: Ensure password-less sudo
+  lineinfile: >
+    dest=/etc/sudoers
+    line="%sudo ALL = (ALL) NOPASSWD: ALL"
+    regexp="^%sudo"
+  notify:
+    - Reload sudo

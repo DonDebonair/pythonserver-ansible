@@ -1,0 +1,45 @@
+---
+
+- name: Ensure existence of SSL directory
+  file:
+    path={{ nginx_cert_dir }}
+    state=directory
+    owner=www-data
+    mode=0700
+
+- name: Copy private keys
+  copy:
+    src={{ local_cert_dir }}/{{ item.server }}.key.pwd
+    dest={{ nginx_cert_dir }}/{{ item.server }}.key.pwd
+    mode=0400
+    owner=www-data
+  when: item.secure|default(False)
+  with_items: nginx_proxies|union(nginx_sites)
+  notify:
+    - restart nginx
+
+- name: Remove passphrase from keys
+  command: openssl rsa -in {{ nginx_cert_dir }}/{{ item.server }}.key.pwd -out {{ nginx_cert_dir }}/{{ item.server }}.key -passin pass:{{ lookup('password', '~/.ansible/vault/' + ansible_user_id + '/nginx/' + item.server + ' length=80') }}
+    creates={{ nginx_cert_dir }}/{{ item.server }}.key
+  when: item.secure|default(False)
+  with_items: nginx_proxies|union(nginx_sites)
+
+- name: Make key files a bit more secure
+  file:
+    path={{ nginx_cert_dir}}/{{ item.server }}.key
+    mode=0400
+    owner=www-data
+  when: item.secure|default(False)
+  with_items: nginx_proxies|union(nginx_sites)
+
+- name: Copy certificates
+  copy:
+    src={{ local_cert_dir }}/{{ item.server }}.crt
+    dest={{ nginx_cert_dir }}/{{ item.server }}.crt
+    mode=0400
+    owner=www-data
+  when: item.secure|default(False)
+  with_items: nginx_proxies|union(nginx_sites)
+  notify:
+    - restart nginx
+

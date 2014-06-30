@@ -1,0 +1,7 @@
+pythonbox ansible_ssh_host=10.1.14.100 ansible_ssh_user=vagrant
+
+[appserver]
+pythonbox
+
+[database]
+pythonbox

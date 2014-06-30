@@ -1,16 +1,20 @@
+---
+
 - hosts: all
-  sudo: True
-
-  vars:
-    postgres:
-      superuser: diamond
-      superuser_password: rBJAyLpHx8R4qZgPJE
-
+  sudo: yes
   roles:
-    - common
+    - debian
+
+- hosts: database
+  sudo: yes
+  roles:
+    - postgres
+
+- hosts: appserver
+  sudo: yes
+  roles:
     - python
     - supervisor
-    - role: nginx
-      nginx_sites: none
-    - postgres
+    - nginx
     - redis
+
