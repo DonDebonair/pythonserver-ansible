@@ -1,9 +1,0 @@
----
-
-debian_up2date:
-  default_release: stable
-  extra_repositories:
-    - 'deb http://http.us.debian.org/debian/ testing main contrib non-free'
-    - 'deb http://security.debian.org/ testing/updates main contrib non-free'
-
-kernel_up2date: no

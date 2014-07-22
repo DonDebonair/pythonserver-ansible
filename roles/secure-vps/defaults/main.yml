@@ -1,14 +1,13 @@
 ---
+ufw_reset: no
+
 trusted_networks:
   - 127.0.0.1
   - 10.0.0.0/8
   - 172.16.0.0/12
   - 192.168.0.0/16
 
-nginx_sites: []
+trusted_services: []
 
-nginx_proxies: []
-
-nginx_cert_dir: /var/ssl
-local_cert_dir: certificates
-
+public_services:
+  - ssh

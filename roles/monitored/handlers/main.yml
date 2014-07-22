@@ -1,0 +1,8 @@
+---
+
+- name: Reload collectd
+  service:
+    name=collectd
+    state=restarted
+    enabled=yes
+  sudo: yes

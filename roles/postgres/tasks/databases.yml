@@ -1,8 +1,7 @@
 ---
 
 - name: Enable postgres access
-  command: psql -c "alter user postgres password '{{ postgres_pwd }}'"
-  with_items: databases
+  postgresql_user: name=postgres password={{ postgres_pwd }}
 
 - name: Create databases
   postgresql_db:
@@ -22,11 +21,10 @@
 
 - name: Allow access for database users
   lineinfile:
-    dest=/etc/postgresql/9.1/main/pg_hba.conf
+    dest=/etc/postgresql/9.3/main/pg_hba.conf
     line="host{{ '\t' }}{{ item[0] }}{{ '\t' }}{{ item[0] }}{{ '\t' }}{{ item[1] }}{{ '\t' }}md5"
   with_nested:
     - databases
     - trusted_networks
   notify:
     - reload postgresql
-

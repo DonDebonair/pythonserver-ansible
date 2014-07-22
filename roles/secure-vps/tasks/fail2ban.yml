@@ -1,0 +1,10 @@
+---
+- name: Install fail2ban
+  apt:
+    pkg=fail2ban
+    state=present
+
+- name: Ensure fail2ban is running
+  service:
+    name=fail2ban
+    state=running

@@ -1,4 +1,4 @@
-- name: install supervisor redhat/centos
+- name: install supervisor
   pip: name=supervisor state=latest
 
 - name: ensure supervisor conf.d directory exists
@@ -14,7 +14,7 @@
 - name: Copy supervisor global configuration
   copy: src=supervisord.conf dest=/etc/supervisord.conf
 
-- name: Install as service with automatic start on redhat/centos
+- name: Install as service with automatic start
   copy: src=supervisor dest=/etc/init.d/supervisord mode=0755 group=root owner=root
 
 - name: Enable and run service

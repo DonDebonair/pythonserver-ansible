@@ -1,0 +1,15 @@
+LoadPlugin write_graphite
+
+<Plugin "write_graphite">
+    <Carbon>
+        Host "{{ collectd_graphite_host }}"
+        Port "2003"
+        Prefix "hosts."
+        Postfix ""
+        Protocol "udp"
+        EscapeCharacter "_"
+        SeparateInstances true
+        StoreRates false
+        AlwaysAppendDS false
+    </Carbon>
+</Plugin>

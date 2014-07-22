@@ -3,8 +3,8 @@
 - include: install.yml
   sudo: yes
 
-- include: certificate.yml
-  sudo: yes
+# - include: certificate.yml
+#   sudo: yes
 
 - include: sites.yml
   sudo: yes

@@ -1,0 +1,16 @@
+base_collectd_plugins:
+  - collectd.graphite.conf
+  - collectd.df.conf
+
+extra_collectd_plugins: []
+
+collectd_plugins: "{{ base_collectd_plugins + extra_collectd_plugins }}"
+
+collectd_graphite_host: example.com
+
+# Only when using the collectd.postgres plugin
+databases: []
+
+database_user: collectd
+
+database_password: "{{ lookup('password', '~/.ansible/vault/' + ansible_user_id + '/postgresql/collectd length=80') }}"

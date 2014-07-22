@@ -1,0 +1,7 @@
+---
+
+trusted_services:
+  - postgres
+
+extra_collectd_plugins:
+  - collectd.postgres.conf

@@ -1,0 +1,48 @@
+---
+- name: Install UFW
+  apt:
+    name=ufw
+    state=present
+
+- name: Reset UFW
+  ufw:
+    state=reset
+  when: ufw_reset
+
+- name: Default setup for UFW
+  ufw:
+    policy=deny
+    direction=incoming
+    proto=any
+  notify:
+    - Reload UFW
+
+- name: Allow public services
+  ufw:
+    rule=allow
+    port={{ item }}
+    proto=tcp
+    log=no
+  with_items: public_services
+  when: public_services
+  notify:
+    - Reload UFW
+
+- name: Allow private services from trusted networks
+  ufw:
+    rule=allow
+    port={{ item[0] }}
+    proto=tcp
+    log=no
+    src={{ item[1] }}
+  with_nested:
+    - trusted_services
+    - trusted_networks
+  when: trusted_services
+  notify:
+    - Reload UFW
+
+- name: Enable UFW
+  ufw:
+    state=enabled
+  ignore_errors: yes

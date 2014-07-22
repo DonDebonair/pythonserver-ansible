@@ -9,6 +9,8 @@
     webapps_dir: /srv/webapps
     wsgi_file: app.py
     wsgi_callable: app
+    pwd_root: "{{ '~/.ansible/vault/' + ansible_user_id + '/postgresql/' }}"
+    postgres_pwd: "{{ lookup('password', pwd_root + 'postgres length=80') }}"
     app_database:
       name: myapp
       user: myapp
@@ -17,13 +19,18 @@
   tasks:
     - name: ensure webapps directory
       file: dest={{ webapps_dir }} owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }} state=directory
-      sudo: True
+      sudo: yes
+
+    - name: check if app exists
+      shell: "[ -d {{ webapps_dir }}/{{ app_name }} ] && echo 'Found' || echo ''"
+      register: app_cloned
 
     - name: ensure log directory
       file: dest={{ webapps_dir }}/{{ app_name }}/log state=directory
 
     - name: deploy code from repository
-      shell: git clone -b master {{ repo_url }} {{ webapps_dir }}/{{ app_name }}/src
+      git: repo={{ repo_url }} dest={{ webapps_dir }}/{{ app_name }}/src version=master
+      when: (not app_cloned.stdout)
 
     - name: install dependencies into virtualenv
       pip: requirements={{ webapps_dir }}/{{ app_name }}/src/requirements.txt virtualenv={{ webapps_dir }}/{{ app_name }}/venv state=present
@@ -31,52 +38,57 @@
     - name: create supervisor program config
       template: src=templates/supervisor_app.conf dest=/etc/supervisor/conf.d/{{ app_name }}.conf
       notify:
-        - restart app
-      sudo: True
+        - restart supervisor
+      sudo: yes
 
     - name: create nginx site config
       template: src=templates/nginx_site.conf dest=/etc/nginx/sites-available/{{ app_name }}.conf
       notify:
         - restart nginx
-      sudo: True
+      sudo: yes
 
     - name: link nginx config
       file: src=/etc/nginx/sites-available/{{ app_name }}.conf dest=/etc/nginx/sites-enabled/{{ app_name }}.conf state=link
       notify:
         - restart nginx
-      sudo: True
-
-    - name: start app
-      supervisorctl: name={{ app_name }} state=started
-      sudo: True
+      sudo: yes
 
     - name: setup database for app
       sudo_user: postgres
       postgresql_db:
-        db: "{{ app_database.name }}"
-        encoding: 'UTF-8'
-        lc_collate: 'en_US.UTF-8'
-        lc_ctype: 'en_US.UTF-8'
-        template: 'template0'
-        state: present
-      sudo: True
+        db={{ app_database.name }}
+        encoding='UTF-8'
+        lc_collate='en_US.UTF-8'
+        lc_ctype='en_US.UTF-8'
+        template='template0'
+        state=present
+      sudo: yes
 
     - name: grant access for app database to app user
       sudo_user: postgres
       postgresql_user:
-        db: "{{ app_database.name }}"
-        user: "{{ app_database.user }}"
-        password: "{{ app_database.password }}"
-        priv: ALL
-        state: present
-      sudo: True
+        db={{ app_database.name }}
+        name={{ app_database.user }}
+        password={{ app_database.password }}
+        priv=ALL
+        state=present
+      sudo: yes
+
+    - name: Create collectd user
+      sudo_user: postgres
+      postgresql_user:
+        db={{ app_database.name }}
+        name=collectd
+        password={{ lookup('password', pwd_root + 'collectd length=80') }}
+        role_attr_flags=NOCREATEDB,NOCREATEROLE,NOCREATEUSER
+        state=present
+      sudo: yes
 
   handlers:
-    - name: restart app
-      supervisorctl: name={{ app_name }} state=restarted
-      sudo: True
-
     - name: restart nginx
       service: name=nginx state=restarted
-      sudo: True
+      sudo: yes
 
+    - name: restart supervisor
+      service: name=supervisord state=restarted
+      sudo: yes

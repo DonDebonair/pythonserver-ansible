@@ -1,0 +1,19 @@
+---
+
+- name: Install prerequisites
+  apt:
+    name={{ item }}
+    state=present
+  sudo: yes
+  with_items:
+    - collectd
+
+- name: Create collectd config files
+  template:
+    dest="/etc/collectd/collectd.conf.d/{{ item }}"
+    src="{{ item }}.j2"
+  sudo: yes
+  with_items: collectd_plugins
+  notify:
+    - Reload collectd
+

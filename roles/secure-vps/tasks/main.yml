@@ -1,0 +1,12 @@
+---
+- include: fail2ban.yml
+  sudo: yes
+  tags: fail2ban
+
+- include: ufw.yml
+  sudo: yes
+  tags: ufw
+
+- include: sshd.yml
+  sudo: yes
+  tags: sshd

@@ -2,7 +2,7 @@
 - name: updates a server
   apt: update_cache=yes
 
-- name: upgrade debian
+- name: upgrade ubuntu
   apt:
     upgrade=safe
 
@@ -16,19 +16,6 @@
     - python-pycurl   # Not present on default installs, required for apt_repository
     - build-essential
     - git
-
-- name: Add additional repositories
-  apt_repository:
-    repo='{{ item }}'
-    update_cache=yes
-    state=present
-  with_items: debian_up2date.extra_repositories
-
-- name: Set default release
-  template:
-    src=apt-default-release.j2
-    dest=/etc/apt/apt.conf.d/99-default-release
-    mode=0644
 
 - name: Update packages
   apt:

@@ -7,9 +7,6 @@
   sudo: yes
   tags: unattended
 
-- include: kernel-check.yml
-  tags: kernel_check
-
 - include: sudo.yml
   sudo: yes
   tags: sudo

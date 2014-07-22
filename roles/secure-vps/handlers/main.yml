@@ -1,0 +1,13 @@
+---
+- name: Reload SSH
+  service:
+    name=ssh
+    state=reloaded
+  sudo: yes
+
+- name: Reload UFW
+  service:
+    name=ufw
+    state=restarted
+  sudo: yes
+
